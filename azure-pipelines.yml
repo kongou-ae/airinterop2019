@@ -12,12 +12,12 @@ pool:
 steps:
 - task: AzureFileCopy@3
   inputs:
-    SourcePath: 'Index.html'
+    SourcePath: 'index.html'
     azureSubscription: 'payg(76cd33dc-2d53-4bf7-a356-1558cc49f261)'
     Destination: 'AzureBlob'
     storage: 'airinteropw'
     ContainerName: '$web'
-    BlobPrefix: 'Index.html'
+    BlobPrefix: 'index.html'
 
 - task: AzureFileCopy@3
   inputs:

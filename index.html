@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>AirInterop Tokyo 2019 -e-</title>
+    <title>AirInterop Tokyo 2019</title>
     <meta name="viewport" content="width=device-width">
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -48,7 +48,7 @@
         }
 
         nav {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         h3 {
@@ -62,10 +62,38 @@
 
         .twitter-tweet {
             min-width: initial !important;
+            margin-top: 0px !important;
+            margin-bottom: 0px !important;
+        }
+
+        .CallToAction {
+            display: none !important;
+        }
+
+        .inputBar {
+            display: flex;
+        }
+
+        div.inputBar > button {
+            margin-right: 20px;
+        }
+
+        div.inputBar > input[type=text] {
+            width: 200px;
+            height: 2.5rem;
+        }
+
+        p.subtitle {
+            font-size: 2em;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        a.brand-logo {
+            padding-left: 1rem;
         }
 
     </style>
-    <base target="_blank"> 
 </head>
 <body>
     <main>
@@ -73,6 +101,9 @@
         <div class="nav-wrapper blue darken-2">
             <a href="#" class="brand-logo">AirInterop 2019</a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="https://www.slideshare.net/sho7650/airinterop2014" target=”_blank”>基調講演</a></li>
+                <li><a href="https://togetter.com/t/airinterop" target=”_blank”>Togetter</a>
+                <li><a href="https://twitter.com/airinterop" target=”_blank”>Twitter</a></li>
             </ul>
         </div>
     </nav>
@@ -80,18 +111,25 @@
     <div id="app">
         <div class="row">
             <div class="col s12 m9">
-                    <input v-model="inputId" placeholder="@YourName">
-                    <button class="waves-effect waves-light btn blue darken-4" v-on:click="updateTweeetList">検索</button>
-                    <a href="/" class="waves-effect waves-light btn blue darken-4">ランダム</a>            
-                    <div class="row">
-                        <div v-for="tweet in tweets">
-                            <div class="col s12 m4">
-                                <div class="card">
-                                    <div class="card-content" v-html="tweet"></div>
-                                </div>
+                <div class="row">
+                    <div class="col s12 m12">
+                        <p class="subtitle">－エアーインタロップ温故知新</p>
+                    </div>
+                </div>
+                <div class="inputBar">
+                    <button v-on:click="updateDefaultList" class="waves-effect waves-light btn blue darken-4">ランダム</button>
+                    <input v-model="inputId" placeholder="@YourName" pattern="^@.*" type='text' required />
+                    <button class="waves-effect waves-light btn blue darken-4" v-on:click="updateTweeetList">抽出</button>
+                </div>
+                <div class="row">
+                    <div v-for="tweet in tweets">
+                        <div class="col s12 m4">
+                            <div class="card">
+                                <div class="card-content" v-html="tweet"></div>
                             </div>
                         </div>
                     </div>
+                </div>
             </div>            
             <div class="col s12 m3">
                 <a href="http://twitter.com/share?text=AirInteropに事前登録しました&url=https://www.airinterop.jp&hashtags=airinterop事前登録" onClick="window.open(encodeURI(decodeURI(this.href)), 'tweetwindow', 'width=650, height=470, personalbar=0, toolbar=0, scrollbars=1, sizable=1'); return false;" rel="nofollow"><button id="registered"class="waves-effect waves-light btn-large blue darken-4">事前登録</button></a>
@@ -111,7 +149,7 @@
     <footer class="page-footer blue darken-2">
         <div class="footer-copyright">
             <div class="container">
-            © 2019 kongou_ae
+            © 2019 @kongou_ae
             </div>
         </div>
     </footer>
@@ -157,6 +195,25 @@
                 
                     axios
                     .get('https://api.airinterop.jp/api/user/' + this.inputId.replace('@',''))
+                    .then(response => {
+                        this.tweets = response.data
+                        this.tweets.map((tweet,idx) => {
+                            axios
+                            .get('https://api.airinterop.jp/api/oembed/' + tweet.username + '/' + tweet.tweetId)
+                            .then(response => {
+                                oembedTweets.push(response.data.html)
+                                this.$nextTick(() => {
+                                    twttr.widgets.load(); 
+                                })
+                            })
+                        })
+                        this.tweets = oembedTweets
+                    })
+                },
+                updateDefaultList(){
+                    let oembedTweets = [];
+                    axios
+                    .get('https://api.airinterop.jp/api/users')
                     .then(response => {
                         this.tweets = response.data
                         this.tweets.map((tweet,idx) => {
